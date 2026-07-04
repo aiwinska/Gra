@@ -417,3 +417,11 @@ class Game:
             surface.blit(hint, (25, 115))
 
         pygame.draw.line(surface, (70, 80, 90), (0, 110), (WIDTH, 110), 2)
+
+game = Game()
+
+SPAWN_TICK = pygame.USEREVENT + 1
+METABOLISM_TICK = pygame.USEREVENT + 2
+
+pygame.time.set_timer(SPAWN_TICK, 420)
+pygame.time.set_timer(METABOLISM_TICK, 1500)
