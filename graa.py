@@ -639,3 +639,119 @@ while True:
                              border_radius=6)
             screen.blit(font_sm.render("Syntezuj: 1 Macierzysta, 6 Amino, 70 ATP", True, (255, 255, 255)), (515, 513))
 
+# ETAP 4: ATLAS CIAŁA
+        elif game.current_tab == 4:
+            # Lewy panel anatomii
+            pygame.draw.rect(screen, (28, 33, 40), (40, 150, 430, 540), border_radius=4)
+            pygame.draw.rect(screen, (50, 60, 70), (40, 150, 430, 540), 1, border_radius=4)
+            screen.blit(font_lg.render("MAPOWANIE ANATOMICZNE OSOBNIKA", True, COLOR_GOLD), (60, 165))
+
+            # Sylwetka człowieka w tle
+            pygame.draw.rect(screen, (42, 48, 58), (200, 260, 110, 200), border_radius=15)
+            pygame.draw.circle(screen, (42, 48, 58), (255, 225), 32)
+
+            # KOLEJNOŚĆ WARSTW (Z-ORDER): Najpierw duże i głębokie narządy, małe na wierzch!
+            z_order = [
+                ("lungs", "Płuca", COLOR_PURPLE, game.target_lungs),
+                ("stomach", "Żołądek", COLOR_ORANGE, game.target_stomach),
+                ("heart", "Serce", COLOR_RED, game.target_heart),
+                ("brain", "Mózg", (100, 180, 255), game.target_brain)
+            ]
+
+            for key, nazwa, kolor, target in z_order:
+                if getattr(game, f"placed_{key}"):
+                    # Narząd zajmuje CAŁY swój obszar, dostaje ramkę i wyśrodkowany tekst
+                    pygame.draw.rect(screen, kolor, target, border_radius=8)
+                    pygame.draw.rect(screen, (255, 255, 255), target, 1, border_radius=8)
+                    t_surf = font_sm.render(nazwa, True, (255, 255, 255))
+                    screen.blit(t_surf, (target.x + (target.width - t_surf.get_width()) // 2,
+                                         target.y + (target.height - t_surf.get_height()) // 2))
+                else:
+                    # Cień pustego miejsca na narząd
+                    pygame.draw.rect(screen, (24, 28, 35), target, border_radius=4)
+                    pygame.draw.rect(screen, (60, 70, 85), target, 1)
+                    screen.blit(font_sm.render(nazwa[0], True, COLOR_TEXT_MUTED), (target.x + 8, target.y + 6))
+
+            # Prawy panel: Fabryka
+            screen.blit(font_title.render("FABRYKA NARZĄDÓW", True, COLOR_TEXT), (520, 130))
+
+            # 1. Mózg (Potrzebuje tkanki nerwowej i nabłonkowej do naczyń/opon)
+            c_brain = not game.organ_brain and game.tissue_nerve >= 2 and game.tissue_epithelial >= 1 and game.atp >= 60
+            pygame.draw.rect(screen,
+                             (100, 180, 255) if c_brain else (50, 55, 65) if not game.organ_brain else COLOR_GREEN,
+                             game.btn_build_brain, border_radius=6)
+            pygame.draw.rect(screen, (255, 255, 255) if c_brain else (90, 95, 100), game.btn_build_brain, 1,
+                             border_radius=6)
+            lbl_b = "GOTOWE: Mózg" if game.organ_brain else "Mózg (2x Nerw, 1x Nabł, 60 ATP)"
+            screen.blit(font_sm.render(lbl_b, True, (255, 255, 255)),
+                        (game.btn_build_brain.x + 12, game.btn_build_brain.y + 10))
+
+            # 2. Serce (Głównie mięsień, ale też sterowanie nerwowe i wyściółka nabłonkowa)
+            c_heart = not game.organ_heart and game.tissue_muscle >= 2 and game.tissue_nerve >= 1 and game.tissue_epithelial >= 1 and game.atp >= 70
+            pygame.draw.rect(screen, COLOR_RED if c_heart else (65, 45, 45) if not game.organ_heart else COLOR_GREEN,
+                             game.btn_build_heart, border_radius=6)
+            pygame.draw.rect(screen, (255, 255, 255) if c_heart else (90, 95, 100), game.btn_build_heart, 1,
+                             border_radius=6)
+            lbl_h = "GOTOWE: Serce" if game.organ_heart else "Serce (2x Mięś, 1x Nerw, 1x Nabł, 70 ATP)"
+            screen.blit(font_sm.render(lbl_h, True, (255, 255, 255)),
+                        (game.btn_build_heart.x + 12, game.btn_build_heart.y + 10))
+
+            # 3. Płuca (Dużo nabłonka od pęcherzyków, tkanka kostna/łączna jako rusztowanie chrzęstne)
+            c_lungs = not game.organ_lungs and game.tissue_epithelial >= 2 and game.tissue_bone >= 1 and game.atp >= 60
+            pygame.draw.rect(screen, COLOR_PURPLE if c_lungs else (55, 45, 60) if not game.organ_lungs else COLOR_GREEN,
+                             game.btn_build_lungs, border_radius=6)
+            pygame.draw.rect(screen, (255, 255, 255) if c_lungs else (90, 95, 100), game.btn_build_lungs, 1,
+                             border_radius=6)
+            lbl_l = "GOTOWE: Płuca" if game.organ_lungs else "Płuca (2x Nabł, 1x Kost, 60 ATP)"
+            screen.blit(font_sm.render(lbl_l, True, (255, 255, 255)),
+                        (game.btn_build_lungs.x + 12, game.btn_build_lungs.y + 10))
+
+            # 4. Żołądek (Nabłonek trawienny, gruba warstwa mięśni gładkich i układ nerwowy)
+            c_stom = not game.organ_stomach and game.tissue_epithelial >= 2 and game.tissue_muscle >= 1 and game.tissue_nerve >= 1 and game.atp >= 50
+            pygame.draw.rect(screen,
+                             COLOR_ORANGE if c_stom else (60, 50, 45) if not game.organ_stomach else COLOR_GREEN,
+                             game.btn_build_stomach, border_radius=6)
+            pygame.draw.rect(screen, (255, 255, 255) if c_stom else (90, 95, 100), game.btn_build_stomach, 1,
+                             border_radius=6)
+            lbl_s = "GOTOWE: Żołądek" if game.organ_stomach else "Żołądek (2x Nabł, 1x Mięś, 1x Nerw, 50 ATP)"
+            screen.blit(font_sm.render(lbl_s, True, (255, 255, 255)),
+                        (game.btn_build_stomach.x + 12, game.btn_build_stomach.y + 10))
+
+            # --- NOWY OBNIŻONY INKUBATOR ---
+            screen.blit(font_lg.render("INKUBATOR TKANKOWY", True, COLOR_GOLD), (520, 410))
+            # Wizualne tło inkubatora, pod przyciskami
+            pygame.draw.rect(screen, (20, 24, 30), (520, 440, 340, 110), border_radius=8)
+            pygame.draw.rect(screen, (50, 60, 75), (520, 440, 340, 110), 1, border_radius=8)
+
+            # Rysowanie wyhodowanych narządów (tylko tych, które nie są jeszcze na człowieku)
+            organs_render_list = [
+                ("brain", "Mózg", (100, 180, 255)),
+                ("heart", "Serce", COLOR_RED),
+                ("lungs", "Płuca", COLOR_PURPLE),
+                ("stomach", "Żołądek", COLOR_ORANGE)
+            ]
+            for key, name, color in organs_render_list:
+                if getattr(game, f"organ_{key}") and not getattr(game, f"placed_{key}"):
+                    pos = game.organ_pos[key]
+                    pygame.draw.rect(screen, color, (pos[0], pos[1], 70, 50), border_radius=5)
+                    pygame.draw.rect(screen, (255, 255, 255), (pos[0], pos[1], 70, 50), 1, border_radius=5)
+                    text_surface = font_sm.render(name, True, (255, 255, 255))
+                    screen.blit(text_surface, (pos[0] + (70 - text_surface.get_width()) // 2, pos[1] + 16))
+        game.draw_ui(screen)
+    elif game.state == "GAME_OVER":
+        screen.fill((35, 18, 18))
+        screen.blit(font_title.render("KRACH METABOLICZNY. PROCES PRZERWANY.", True, COLOR_RED),
+                    (WIDTH // 2 - 390, HEIGHT // 2 - 50))
+        screen.blit(font_md.render("Poziom ATP spadł do zera. Zygota uległa degradacji.", True, COLOR_TEXT),
+                    (WIDTH // 2 - 210, HEIGHT // 2 + 20))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: pygame.quit(); sys.exit()
+    elif game.state == "VICTORY":
+        screen.fill((20, 40, 25))
+        screen.blit(font_title.render("ORGANIZM UKOŃCZONY!", True, COLOR_GOLD), (WIDTH // 2 - 220, HEIGHT // 2 - 50))
+        screen.blit(font_md.render("Ontogeneza zakończona pełnym sukcesem.", True, COLOR_TEXT),
+                    (WIDTH // 2 - 180, HEIGHT // 2 + 20))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: pygame.quit(); sys.exit()
+    pygame.display.flip()
+    clock.tick(60)
