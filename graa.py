@@ -513,3 +513,129 @@ while True:
                 game.resources.add(res)
 
             if event.type == METABOLISM_TICK: game.metabolize()
+        # ETAP 1: KRWIOBIEG
+        if game.current_tab == 1:
+            game.sprites.update()
+            hits = pygame.sprite.spritecollide(game.player, game.resources, True)
+            for hit in hits:
+                if hit.type == "oxygen": game.o2 += 1
+                if hit.type == "glucose": game.glucose += 1
+                if hit.type == "amino": game.amino += 1
+                if hit.type == "toxin": game.atp -= 50
+            game.sprites.draw(screen)
+
+        # ETAP 2: MITOZA
+        elif game.current_tab == 2:
+            pygame.draw.rect(screen, (28, 33, 40), (40, 150, 430, 540), border_radius=4)
+            pygame.draw.rect(screen, (50, 60, 70), (40, 150, 430, 540), 1, border_radius=4)
+            screen.blit(font_lg.render("PROTOKÓŁ MEDYCZNY: MITOZA", True, COLOR_GOLD), (60, 170))
+            bio_text = [
+                "1. Replikacja DNA: Przed podziałem enzymy", "muszą skopiować cały genom komórki.", "",
+                "2. Punkty kontrolne: Komórka weryfikuje błędy.", "Zbyt szybkie tempo zmusza aparat replikacyjny",
+                "do ignorowania uszkodzeń strukturalnych.", "",
+                "3. Kancerogeneza: Niestabilne DNA tworzy", "komórki zmutowane. Nie budują tkanek, lecz",
+                "drenują energię organizmu (-4 ATP / cykl).", "",
+                "4. Apoptoza: Sterowana śmierć komórki", "wywołana przez mechanizmy obronne (Koszt: ATP)."
+            ]
+            for i, line in enumerate(bio_text):
+                color = COLOR_GOLD if any(x in line for x in ["1.", "2.", "3.", "4."]) else COLOR_TEXT
+                screen.blit(font_sm.render(line, True, color), (60, 220 + i * 22))
+
+            screen.blit(font_title.render("ZARZĄDZANIE REPLIKACJĄ", True, COLOR_TEXT), (520, 160))
+            screen.blit(font_md.render("Niestabilność aparatu enzymatycznego:", True, COLOR_TEXT), (520, 230))
+            bar_rect = pygame.Rect(520, 260, 320, 25)
+            pygame.draw.rect(screen, COLOR_BAR_BG, bar_rect, border_radius=4)
+            fill_color = COLOR_GREEN if game.dna_instability < 40 else COLOR_ORANGE if game.dna_instability < 70 else COLOR_RED
+            if game.dna_instability > 0:
+                pygame.draw.rect(screen, fill_color, (520, 260, int((game.dna_instability / 100.0) * 320), 25),
+                                 border_radius=4)
+            pygame.draw.rect(screen, (100, 110, 120), bar_rect, 1, border_radius=4)
+            screen.blit(font_sm.render(f"Ryzyko mutacji przy podziale: {int(game.dna_instability)}%", True, COLOR_TEXT),
+                        (520, 295))
+
+            pygame.draw.rect(screen, COLOR_GREEN if game.atp >= 50 else (50, 60, 55), game.btn_divide, border_radius=4)
+            screen.blit(font_md.render("Inicjuj podział (Koszt: 50 ATP)", True, (255, 255, 255)), (540, 350))
+            pygame.draw.rect(screen, COLOR_RED if game.cancer_cells > 0 and game.atp >= 100 else (55, 45, 45),
+                             game.btn_apoptosis, border_radius=4)
+            screen.blit(font_md.render("Uruchom apoptozę (Koszt: 100 ATP)", True, (255, 255, 255)), (540, 410))
+
+            screen.blit(font_lg.render("Stan populacji komórkowej:", True, COLOR_TEXT), (520, 480))
+            screen.blit(IMAGES["stem"], (520, 530))
+            screen.blit(font_md.render(f"Komórki macierzyste: {game.stem_cells} / 10", True, COLOR_TEXT), (580, 540))
+            screen.blit(IMAGES["cancer"], (520, 590))
+            screen.blit(font_md.render(f"Komórki zmutowane: {game.cancer_cells}", True,
+                                       COLOR_RED if game.cancer_cells > 0 else COLOR_TEXT), (580, 600))
+            if game.cancer_cells > 0: screen.blit(
+                font_sm.render(f"Obciążenie: -{game.cancer_cells * 4} ATP / cykl", True, COLOR_RED), (580, 625))
+
+
+        # ETAP 3: LABORATORIUM
+
+        elif game.current_tab == 3:
+            # Lewy panel informacyjny
+            pygame.draw.rect(screen, (28, 33, 40), (40, 150, 430, 540), border_radius=4)
+            pygame.draw.rect(screen, (50, 60, 70), (40, 150, 430, 540), 1, border_radius=4)
+            screen.blit(font_lg.render("PROTOKÓŁ RÓŻNICOWANIA", True, COLOR_GOLD), (60, 170))
+
+            instrukcje = [
+                "Witaj w Laboratorium Tkanek.", "",
+                "Twoim zadaniem na tym etapie jest",
+                "przekształcenie zebranych wcześniej",
+                "komórek macierzystych i aminokwasów",
+                "w wyspecjalizowane tkanki.", "",
+                "ZASADY:",
+                "- Każda tkanka ma swój własny koszt.",
+                "- Potrzebujesz energii (ATP) do syntezy.", "",
+                "CEL GŁÓWNY (WARUNEK AWANSU):",
+                "Wyhoduj minimum po 2 sztuki z każdego",
+                "rodzaju tkanki (Nerwowa, Mięśniowa,",
+                "Kostna, Nabłonkowa).", "",
+                "Gdy zdobędziesz wymaganą ilość,",
+                "Etap 4 odblokuje się automatycznie!"
+            ]
+            for i, linia in enumerate(instrukcje):
+                kolor = COLOR_GREEN if "CEL GŁÓWNY" in linia or "minimum" in linia else COLOR_TEXT
+                screen.blit(font_sm.render(linia, True, kolor), (60, 220 + (i * 22)))
+
+            # Prawy panel zarządzania produkcją
+            screen.blit(font_title.render("PRODUKCJA TKANEK", True, COLOR_TEXT), (500, 135))
+
+            # 1. Tkanka Nerwowa
+            screen.blit(font_md.render(f" Tkanka Nerwowa | W magazynie: {game.tissue_nerve}/2", True, (100, 180, 255)),
+                        (500, 175))
+            c_nerve = game.stem_cells >= 1 and game.amino >= 5 and game.atp >= 50
+            pygame.draw.rect(screen, (40, 70, 110) if c_nerve else (55, 60, 65), game.btn_craft_nerve, border_radius=6)
+            pygame.draw.rect(screen, (100, 180, 255) if c_nerve else (90, 95, 100), game.btn_craft_nerve, 1,
+                             border_radius=6)
+            screen.blit(font_sm.render("Syntezuj: 1 Macierzysta, 5 Amino, 50 ATP", True, (255, 255, 255)), (515, 213))
+
+            # 2. Tkanka Mięśniowa
+            screen.blit(font_md.render(f" Tkanka Mięśniowa | W magazynie: {game.tissue_muscle}/2", True, COLOR_RED),
+                        (500, 275))
+            c_muscle = game.stem_cells >= 1 and game.amino >= 8 and game.atp >= 40
+            pygame.draw.rect(screen, (110, 40, 40) if c_muscle else (55, 60, 65), game.btn_craft_muscle,
+                             border_radius=6)
+            pygame.draw.rect(screen, COLOR_RED if c_muscle else (90, 95, 100), game.btn_craft_muscle, 1,
+                             border_radius=6)
+            screen.blit(font_sm.render("Syntezuj: 1 Macierzysta, 8 Amino, 40 ATP", True, (255, 255, 255)), (515, 313))
+
+            # 3. Tkanka Kostna
+            screen.blit(font_md.render(f" Tkanka Kostna | W magazynie: {game.tissue_bone}/2", True, (220, 220, 220)),
+                        (500, 375))
+            c_bone = game.stem_cells >= 1 and game.amino >= 12 and game.atp >= 60
+            pygame.draw.rect(screen, (70, 75, 80) if c_bone else (55, 60, 65), game.btn_craft_bone, border_radius=6)
+            pygame.draw.rect(screen, (180, 185, 190) if c_bone else (90, 95, 100), game.btn_craft_bone, 1,
+                             border_radius=6)
+            screen.blit(font_sm.render("Syntezuj: 1 Macierzysta, 12 Amino, 60 ATP", True, (255, 255, 255)), (515, 413))
+
+            # 4. Tkanka Nabłonkowa
+            screen.blit(
+                font_md.render(f" Tkanka Nabłonkowa | W magazynie: {game.tissue_epithelial}/2", True, COLOR_PURPLE),
+                (500, 475))
+            c_epi = game.stem_cells >= 1 and game.amino >= 6 and game.atp >= 70
+            pygame.draw.rect(screen, (80, 40, 100) if c_epi else (55, 60, 65), game.btn_craft_epithelial,
+                             border_radius=6)
+            pygame.draw.rect(screen, COLOR_PURPLE if c_epi else (90, 95, 100), game.btn_craft_epithelial, 1,
+                             border_radius=6)
+            screen.blit(font_sm.render("Syntezuj: 1 Macierzysta, 6 Amino, 70 ATP", True, (255, 255, 255)), (515, 513))
+
