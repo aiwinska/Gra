@@ -239,6 +239,30 @@ class Game:
         self.level2_unlocked = False
         self.level3_unlocked = False
         self.level4_unlocked = False
+
+        self.btn_tab5 = pygame.Rect(720, 20, 120, 40)
+
+        # Słownik do przechowywania statystyk gracza
+        self.stats = {
+            "total_clicks": 0,
+            "atp_generated": 0,
+            "tissues_crafted": 0,
+            "organs_built": 0,
+            "failed_attempts": 0
+        }
+
+        # Jaki artykuł w leksykonie jest aktualnie wybrany
+        self.lexicon_selected = "intro"
+
+        self.btn_lex_intro = pygame.Rect(60, 210, 160, 30)
+        self.btn_lex_nerve = pygame.Rect(60, 250, 160, 30)
+        self.btn_lex_muscle = pygame.Rect(60, 290, 160, 30)
+        self.btn_lex_epith = pygame.Rect(60, 330, 160, 30)
+        self.btn_lex_bone = pygame.Rect(60, 370, 160, 30)
+        self.btn_lex_brain = pygame.Rect(60, 410, 160, 30)
+        self.btn_lex_heart = pygame.Rect(60, 450, 160, 30)
+        self.btn_lex_lungs = pygame.Rect(60, 490, 160, 30)
+        self.btn_lex_stomach = pygame.Rect(60, 530, 160, 30)
     def metabolize(self):
         burned = 0
         while self.glucose >= 1 and self.o2 >= 6 and burned < 2:
@@ -322,6 +346,19 @@ class Game:
                 self.atp -= 50
                 self.organ_stomach = True
 
+    def get_achievements_list(self):
+        achievements = [
+            ("Początek Bioinżynierii", "Stwórz swoją pierwszą tkankę", self.stats["tissues_crafted"] >= 1),
+            ("Fabrykant Tkanek", "Wyhoduj łącznie 10 tkanek", self.stats["tissues_crafted"] >= 10),
+            ("Pierwszy Oddech", "Zbuduj organ: Płuca", self.organ_lungs),
+            ("Władca Myśli", "Zbuduj organ: Mózg", self.organ_brain),
+            ("Pełny Organizm", "Zbuduj wszystkie 4 narządy",
+             self.organ_brain and self.organ_heart and self.organ_lungs and self.organ_stomach),
+            ("Potęga Mitochondrium", "Wygeneruj łącznie 500 ATP", self.stats["atp_generated"] >= 500),
+            ("Pracowity Naukowiec", "Kliknij w grze ponad 200 razy", self.stats["total_clicks"] >= 200),
+            ("Błędy Laboranta", "Spróbuj zbudować coś bez zasobów 5 razy", self.stats["failed_attempts"] >= 5)
+        ]
+        return achievements
     def is_stage2_unlocked(self):
         if self.atp >= 300 and self.amino >= 30: self.level2_unlocked = True
         return self.level2_unlocked
@@ -432,7 +469,6 @@ while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT: pygame.quit(); sys.exit()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE: game.state = "PLAY"
-
     elif game.state == "PLAY":
         screen.fill(COLOR_BG)
         if game.current_tab == 2: game.update_instability()
@@ -482,6 +518,28 @@ while True:
                                 break
 
             if event.type == pygame.MOUSEMOTION:
+                game.stats["total_clicks"] += 1
+                if game.btn_tab5.collidepoint(event.pos):
+                    game.current_tab = 5
+                if game.current_tab == 5:
+                    if game.btn_lex_intro.collidepoint(event.pos):
+                        game.lexicon_selected = "intro"
+                    elif game.btn_lex_nerve.collidepoint(event.pos):
+                        game.lexicon_selected = "nerve"
+                    elif game.btn_lex_muscle.collidepoint(event.pos):
+                        game.lexicon_selected = "muscle"
+                    elif game.btn_lex_epith.collidepoint(event.pos):
+                        game.lexicon_selected = "epith"
+                    elif game.btn_lex_bone.collidepoint(event.pos):
+                        game.lexicon_selected = "bone"
+                    elif game.btn_lex_brain.collidepoint(event.pos):
+                        game.lexicon_selected = "brain"
+                    elif game.btn_lex_heart.collidepoint(event.pos):
+                        game.lexicon_selected = "heart"
+                    elif game.btn_lex_lungs.collidepoint(event.pos):
+                        game.lexicon_selected = "lungs"
+                    elif game.btn_lex_stomach.collidepoint(event.pos):
+                        game.lexicon_selected = "stomach"
                 if game.current_tab == 4 and game.dragging_organ:
                     game.organ_pos[game.dragging_organ][0] = event.pos[0] - game.drag_offset_x
                     game.organ_pos[game.dragging_organ][1] = event.pos[1] - game.drag_offset_y
