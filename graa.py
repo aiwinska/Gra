@@ -425,3 +425,91 @@ METABOLISM_TICK = pygame.USEREVENT + 2
 
 pygame.time.set_timer(SPAWN_TICK, 420)
 pygame.time.set_timer(METABOLISM_TICK, 1500)
+
+while True:
+    if game.state == "INTRO":
+        game.draw_intro(screen)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: pygame.quit(); sys.exit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE: game.state = "PLAY"
+
+    elif game.state == "PLAY":
+        screen.fill(COLOR_BG)
+        if game.current_tab == 2: game.update_instability()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: pygame.quit(); sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                # Przełączanie zakładek
+                for tab in game.tabs_ui:
+                    if tab["rect"].collidepoint(event.pos):
+                        if tab["id"] == 2 and not game.is_stage2_unlocked(): continue
+                        if tab["id"] == 3 and not game.is_stage3_unlocked(): continue
+                        if tab["id"] == 4 and not game.is_stage4_unlocked(): continue
+                        game.current_tab = tab["id"]
+
+                # Kliknięcia w Etapie 2
+                if game.current_tab == 2:
+                    if game.btn_divide.collidepoint(event.pos): game.trigger_mitosis()
+                    if game.btn_apoptosis.collidepoint(event.pos): game.trigger_apoptosis()
+
+                # Kliknięcia w Etapie 3
+                if game.current_tab == 3:
+                    if game.btn_craft_nerve.collidepoint(event.pos):
+                        game.craft_tissue("nerve")
+                    if game.btn_craft_muscle.collidepoint(event.pos):
+                        game.craft_tissue("muscle")
+                    if game.btn_craft_bone.collidepoint(event.pos):
+                        game.craft_tissue("bone")
+                    if game.btn_craft_epithelial.collidepoint(event.pos):
+                        game.craft_tissue("epithelial")
+
+                # Kliknięcia i chwytanie w Etapie 4
+                if game.current_tab == 4:
+                    if game.btn_build_brain.collidepoint(event.pos): game.build_organ("brain")
+                    if game.btn_build_heart.collidepoint(event.pos): game.build_organ("heart")
+                    if game.btn_build_lungs.collidepoint(event.pos): game.build_organ("lungs")
+                    if game.btn_build_stomach.collidepoint(event.pos): game.build_organ("stomach")
+
+                    for organ, pos in game.organ_pos.items():
+                        if getattr(game, f"organ_{organ}") and not getattr(game, f"placed_{organ}"):
+                            rect = pygame.Rect(pos[0], pos[1], 70, 50)
+                            if rect.collidepoint(event.pos):
+                                game.dragging_organ = organ
+                                game.drag_offset_x = event.pos[0] - pos[0]
+                                game.drag_offset_y = event.pos[1] - pos[1]
+                                break
+
+            if event.type == pygame.MOUSEMOTION:
+                if game.current_tab == 4 and game.dragging_organ:
+                    game.organ_pos[game.dragging_organ][0] = event.pos[0] - game.drag_offset_x
+                    game.organ_pos[game.dragging_organ][1] = event.pos[1] - game.drag_offset_y
+
+            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                if game.current_tab == 4 and game.dragging_organ:
+                    organ = game.dragging_organ
+                    pos = game.organ_pos[organ]
+                    target = getattr(game, f"target_{organ}")
+
+                    if target.collidepoint(pos[0] + 35, pos[1] + 25):
+                        game.organ_pos[organ] = [target.x, target.y]
+                        setattr(game, f"placed_{organ}", True)
+                    else:
+                        reset_pos = {"brain": [540, 440], "heart": [620, 440], "lungs": [700, 440],
+                                     "stomach": [780, 440]}
+                        game.organ_pos[organ] = reset_pos[organ]
+
+                    game.dragging_organ = None
+
+                    if game.placed_brain and game.placed_heart and game.placed_lungs and game.placed_stomach:
+                        game.state = "VICTORY"
+
+
+            if event.type == SPAWN_TICK and game.current_tab == 1:
+                choices = ["oxygen"] * 6 + ["glucose"] * 2 + ["amino"] * 2 + ["toxin"] * 1
+                res = Resource(random.choice(choices))
+                game.sprites.add(res)
+                game.resources.add(res)
+
+            if event.type == METABOLISM_TICK: game.metabolize()
