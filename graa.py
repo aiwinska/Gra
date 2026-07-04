@@ -456,7 +456,13 @@ while True:
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT: pygame.quit(); sys.exit()
-
+            elif event.type == pygame.MOUSEMOTION:
+                # Jeśli gracz trzyma jakiś narząd, aktualizuj jego pozycję na bieżąco za myszką
+                if game.current_tab == 4 and game.dragging_organ:
+                    organ = game.dragging_organ
+                    # Nowa pozycja to pozycja myszki minus przesunięcie (offset) z momentu kliknięcia
+                    game.organ_pos[organ][0] = event.pos[0] - game.drag_offset_x
+                    game.organ_pos[organ][1] = event.pos[1] - game.drag_offset_y
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 game.stats["total_clicks"] += 1
                 pos = event.pos
