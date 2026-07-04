@@ -229,7 +229,6 @@ class Game:
         # GLOBALNY SŁOWNIK STATYSTYK I OSIĄGNIĘĆ
         self.stats = {
             "total_clicks": 0,
-            "atp_generated": 0,
             "tissues_crafted": 0,
             "organs_built": 0,
             "failed_attempts": 0
@@ -337,7 +336,6 @@ class Game:
             ("Władca Myśli", "Zbuduj organ: Mózg", self.organ_brain),
             ("Pełny Organizm", "Zbuduj wszystkie 4 narządy",
              self.organ_brain and self.organ_heart and self.organ_lungs and self.organ_stomach),
-            ("Potęga Mitochondrium", "Wygeneruj łącznie 500 ATP", self.stats["atp_generated"] >= 500),
             ("Pracowity Naukowiec", "Kliknij w grze ponad 200 razy", self.stats["total_clicks"] >= 200),
             ("Błędy Laboranta", "Spróbuj zbudować coś bez zasobów 5 razy", self.stats["failed_attempts"] >= 5)
         ]
@@ -608,22 +606,28 @@ while True:
                     game.organ_pos[game.dragging_organ][0] = event.pos[0] - game.drag_offset_x
                     game.organ_pos[game.dragging_organ][1] = event.pos[1] - game.drag_offset_y
 
-            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 if game.current_tab == 4 and game.dragging_organ:
                     organ = game.dragging_organ
                     pos = game.organ_pos[organ]
                     target = getattr(game, f"target_{organ}")
 
+                    # Sprawdzamy czy środek przeciąganego prostokąta trafia w cel
                     if target.collidepoint(pos[0] + 35, pos[1] + 25):
                         game.organ_pos[organ] = [target.x, target.y]
                         setattr(game, f"placed_{organ}", True)
                     else:
-                        reset_pos = {"brain": [540, 440], "heart": [620, 440], "lungs": [700, 440],
-                                     "stomach": [780, 440]}
+                        reset_pos = {
+                            "brain": [540, 470],
+                            "heart": [620, 470],
+                            "lungs": [700, 470],
+                            "stomach": [780, 470]
+                        }
                         game.organ_pos[organ] = reset_pos[organ]
 
                     game.dragging_organ = None
 
+                    # Sprawdzenie warunku wygranej
                     if game.placed_brain and game.placed_heart and game.placed_lungs and game.placed_stomach:
                         game.state = "VICTORY"
 
@@ -657,7 +661,7 @@ while True:
                 "do ignorowania uszkodzeń strukturalnych.", "",
                 "3. Kancerogeneza: Niestabilne DNA tworzy", "komórki zmutowane. Nie budują tkanek, lecz",
                 "drenują energię organizmu (-4 ATP / cykl).", "",
-                "4. Apoptoza: Sterowana śmierć komórki", "wywołana przez mechanizmy obronne (Koszt: ATP)."
+                "4. Apoptoza: Sterowana śmierć komórki", "wywołana przez mechanizmy obronne."
             ]
             for i, line in enumerate(bio_text):
                 color = COLOR_GOLD if any(x in line for x in ["1.", "2.", "3.", "4."]) else COLOR_TEXT
@@ -908,7 +912,7 @@ while True:
                             (tx, ty + 80))
                 screen.blit(font_sm.render("z jej strukturą biologiczną, funkcją", True, COLOR_TEXT), (tx, ty + 100))
                 screen.blit(font_sm.render("w organizmie oraz wymaganiami syntezy.", True, COLOR_TEXT), (tx, ty + 120))
-                
+
 
             elif game.lexicon_selected == "nerve":
                 screen.blit(font_lg.render("Tkanka Nerwowa (Nervous Tissue)", True, COLOR_GOLD), (tx, ty))
@@ -1018,14 +1022,12 @@ while True:
             screen.blit(font_lg.render("STATYSTYKI", True, COLOR_GOLD), (rx, ry))
             screen.blit(font_sm.render(f"Kliknięcia ogółem: {game.stats['total_clicks']}", True, (240, 240, 240)),
                         (rx, ry + 30))
-            screen.blit(font_sm.render(f"Wygenerowane ATP: {game.stats['atp_generated']}", True, (240, 240, 240)),
-                        (rx, ry + 50))
             screen.blit(font_sm.render(f"Wyhodowane tkanki: {game.stats['tissues_crafted']}", True, (240, 240, 240)),
-                        (rx, ry + 70))
+                        (rx, ry + 50))
             screen.blit(font_sm.render(f"Zbudowane narządy: {game.stats['organs_built']}", True, (240, 240, 240)),
-                        (rx, ry + 90))
+                        (rx, ry + 70))
             screen.blit(font_sm.render(f"Błędy laboratoryjne: {game.stats['failed_attempts']}", True, (240, 240, 240)),
-                        (rx, ry + 110))
+                        (rx, ry + 90))
 
             pygame.draw.line(screen, (60, 70, 85), (620, 350), (835, 350), 1)
             screen.blit(font_lg.render("OSIĄGNIĘCIA", True, COLOR_GOLD), (rx, 360))
