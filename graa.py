@@ -570,14 +570,14 @@ while True:
                             game.stats["failed_attempts"] += 1  # Brak surowców = błąd
 
                     # --- Logika Chwytania Narządów (Drag & Drop) ---
-                    for key in game.organ_pos:
-                        if getattr(game, f"organ_{key}") and not getattr(game, f"placed_{key}"):
-                            opos = game.organ_pos[key]
-                            orect = pygame.Rect(opos[0], opos[1], 70, 50)
-                            if orect.collidepoint(pos):
-                                game.dragging_organ = key
-                                game.drag_offset_x = pos[0] - opos[0]
-                                game.drag_offset_y = pos[1] - opos[1]
+                    for organ, pos in game.organ_pos.items():
+                        if getattr(game, f"organ_{organ}") and not getattr(game, f"placed_{organ}"):
+                            # Zwiększamy strefę kliknięcia z 70x50 do bezpiecznych 120x60
+                            rect = pygame.Rect(pos[0], pos[1], 120, 60)
+                            if rect.collidepoint(event.pos):
+                                game.dragging_organ = organ
+                                game.drag_offset_x = event.pos[0] - pos[0]
+                                game.drag_offset_y = event.pos[1] - pos[1]
                                 break
 
                     # =================================================================
@@ -618,10 +618,10 @@ while True:
                         setattr(game, f"placed_{organ}", True)
                     else:
                         reset_pos = {
-                            "brain": [540, 470],
-                            "heart": [620, 470],
-                            "lungs": [700, 470],
-                            "stomach": [780, 470]
+                            "brain": [540, 440],
+                            "heart": [620, 440],
+                            "lungs": [700, 440],
+                            "stomach": [780, 440]
                         }
                         game.organ_pos[organ] = reset_pos[organ]
 
