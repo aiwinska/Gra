@@ -161,88 +161,71 @@ class Game:
         self.tissue_bone = 0
         self.tissue_epithelial = 0
 
-
-        self.btn_craft_nerve = pygame.Rect(520, 225, 340, 40)
-        self.btn_craft_muscle = pygame.Rect(520, 310, 340, 40)
-        self.btn_craft_bone = pygame.Rect(520, 395, 340, 40)
-        self.btn_craft_epithelial = pygame.Rect(520, 480, 340, 40)
-
-
-
-        self.sprites = pygame.sprite.Group()
-        self.resources = pygame.sprite.Group()
-        self.player = PlayerReceptor()
-        self.sprites.add(self.player)
-
-        self.tabs_ui = [
-            {"id": 1, "rect": pygame.Rect(10, 10, 210, 40), "label": "1. Krwiobieg"},
-            {"id": 2, "rect": pygame.Rect(230, 10, 210, 40), "label": "2. Mitoza"},
-            {"id": 3, "rect": pygame.Rect(450, 10, 210, 40), "label": "3. Laboratorium"},
-            {"id": 4, "rect": pygame.Rect(670, 10, 210, 40), "label": "4. Atlas ciała"}
-        ]
-        # --- NOWE POLA ETAPU 4 (ATLAS CIAŁA) ---
-        self.organ_brain = False
-        self.organ_heart = False
-        self.organ_skeleton = False
-        self.organ_lungs = False
-        self.organ_stomach = False
-
-
-        self.btn_build_brain = pygame.Rect(520, 170, 340, 40)
-        self.btn_build_heart = pygame.Rect(520, 225, 340, 40)
-        self.btn_build_lungs = pygame.Rect(520, 280, 340, 40)
-        self.btn_build_stomach = pygame.Rect(520, 335, 340, 40)
-
-
-        self.organ_pos = {
-            "brain": [535, 470],
-            "heart": [615, 470],
-            "lungs": [695, 470],
-            "stomach": [775, 470]
-        }
-
-        # --- ROZBUDOWANY ETAP 3 & 4 (NOWE TKANKI, ORGANY I DRAG & DROP) ---
-        self.tissue_epithelial = 0
-        self.btn_craft_epithelial = pygame.Rect(520, 310, 340, 40)
-
-        self.organ_brain = False
-        self.organ_heart = False
-        self.organ_lungs = False
-        self.organ_stomach = False
-
-        self.placed_brain = False
-        self.placed_heart = False
-        self.placed_lungs = False
-        self.placed_stomach = False
-
+        # Przycisk tworzenia tkanek (wyrównane z logiką rysowania w zakładce 3)
         self.btn_craft_nerve = pygame.Rect(500, 200, 360, 45)
         self.btn_craft_muscle = pygame.Rect(500, 300, 360, 45)
         self.btn_craft_bone = pygame.Rect(500, 400, 360, 45)
         self.btn_craft_epithelial = pygame.Rect(500, 500, 360, 45)
 
+        # SPRITE'Y (ETAP 1)
+        self.sprites = pygame.sprite.Group()
+        self.resources = pygame.sprite.Group()
+        self.player = PlayerReceptor()
+        self.sprites.add(self.player)
+
+        # PASEK NAWIGACYJNY (MENU GÓRNE)
+        self.tabs_ui = [
+            {"id": 1, "rect": pygame.Rect(10, 10, 160, 40), "label": "1. Krwiobieg"},
+            {"id": 2, "rect": pygame.Rect(180, 10, 160, 40), "label": "2. Mitoza"},
+            {"id": 3, "rect": pygame.Rect(350, 10, 160, 40), "label": "3. Laboratorium"},
+            {"id": 4, "rect": pygame.Rect(520, 10, 160, 40), "label": "4. Atlas ciała"}
+        ]
+        # Przycisk dla zakładki 5 (Baza danych) przesunięty, by nie nachodził na resztę
+        self.btn_tab5 = pygame.Rect(690, 10, 160, 40)
+
+        # BLOKADY ETAPÓW
+        self.level2_unlocked = False
+        self.level3_unlocked = False
+        self.level4_unlocked = False
+
+        # --- ETAP 4: STATUSY BUDOWY NARZĄDÓW ---
+        self.organ_brain = False
+        self.organ_heart = False
+        self.organ_lungs = False
+        self.organ_stomach = False
+
+        # Statusy umieszczenia narządów na sylwetce (Drag & Drop)
+        self.placed_brain = False
+        self.placed_heart = False
+        self.placed_lungs = False
+        self.placed_stomach = False
+
+        # Przyciski fabryki narządów w panelu bocznym
+        self.btn_build_brain = pygame.Rect(520, 170, 340, 40)
+        self.btn_build_heart = pygame.Rect(520, 225, 340, 40)
+        self.btn_build_lungs = pygame.Rect(520, 280, 340, 40)
+        self.btn_build_stomach = pygame.Rect(520, 335, 340, 40)
+
+        # Początkowe pozycje narządów w magazynie inkubatora (dolny prawy róg)
         self.organ_pos = {
-            "brain": [540, 440],
-            "heart": [620, 440],
-            "lungs": [700, 440],
-            "stomach": [780, 440]
+            "brain": [540, 470],
+            "heart": [620, 470],
+            "lungs": [700, 470],
+            "stomach": [780, 470]
         }
 
-        self.dragging_organ = None
-        self.drag_offset_x = 0
-        self.drag_offset_y = 0
-
+        # Strefy dopasowania (anatomia sylwetki po lewej stronie ekranu)
         self.target_brain = pygame.Rect(220, 200, 70, 50)
         self.target_lungs = pygame.Rect(200, 290, 110, 60)
         self.target_heart = pygame.Rect(235, 300, 40, 40)
         self.target_stomach = pygame.Rect(220, 380, 70, 50)
 
-        self.level2_unlocked = False
-        self.level3_unlocked = False
-        self.level4_unlocked = False
+        # Logika przeciągania myszką
+        self.dragging_organ = None
+        self.drag_offset_x = 0
+        self.drag_offset_y = 0
 
-        self.btn_tab5 = pygame.Rect(720, 20, 120, 40)
-
-        # Słownik do przechowywania statystyk gracza
+        # GLOBALNY SŁOWNIK STATYSTYK I OSIĄGNIĘĆ
         self.stats = {
             "total_clicks": 0,
             "atp_generated": 0,
@@ -251,9 +234,8 @@ class Game:
             "failed_attempts": 0
         }
 
-        # Jaki artykuł w leksykonie jest aktualnie wybrany
+        # LEKSYKON (ETAP 5) - PRZYCISKI MENU BOCZNEGO
         self.lexicon_selected = "intro"
-
         self.btn_lex_intro = pygame.Rect(60, 210, 160, 30)
         self.btn_lex_nerve = pygame.Rect(60, 250, 160, 30)
         self.btn_lex_muscle = pygame.Rect(60, 290, 160, 30)
@@ -697,7 +679,9 @@ while True:
                              border_radius=6)
             screen.blit(font_sm.render("Syntezuj: 1 Macierzysta, 6 Amino, 70 ATP", True, (255, 255, 255)), (515, 513))
 
-# ETAP 4: ATLAS CIAŁA
+            # ========================================================================
+            # ETAP 4: ATLAS CIAŁA
+            # ========================================================================
         elif game.current_tab == 4:
             # Lewy panel anatomii
             pygame.draw.rect(screen, (28, 33, 40), (40, 150, 430, 540), border_radius=4)
@@ -733,7 +717,7 @@ while True:
             # Prawy panel: Fabryka
             screen.blit(font_title.render("FABRYKA NARZĄDÓW", True, COLOR_TEXT), (520, 130))
 
-            # 1. Mózg (Potrzebuje tkanki nerwowej i nabłonkowej do naczyń/opon)
+            # 1. Mózg
             c_brain = not game.organ_brain and game.tissue_nerve >= 2 and game.tissue_epithelial >= 1 and game.atp >= 60
             pygame.draw.rect(screen,
                              (100, 180, 255) if c_brain else (50, 55, 65) if not game.organ_brain else COLOR_GREEN,
@@ -744,7 +728,7 @@ while True:
             screen.blit(font_sm.render(lbl_b, True, (255, 255, 255)),
                         (game.btn_build_brain.x + 12, game.btn_build_brain.y + 10))
 
-            # 2. Serce (Głównie mięsień, ale też sterowanie nerwowe i wyściółka nabłonkowa)
+            # 2. Serce
             c_heart = not game.organ_heart and game.tissue_muscle >= 2 and game.tissue_nerve >= 1 and game.tissue_epithelial >= 1 and game.atp >= 70
             pygame.draw.rect(screen, COLOR_RED if c_heart else (65, 45, 45) if not game.organ_heart else COLOR_GREEN,
                              game.btn_build_heart, border_radius=6)
@@ -754,7 +738,7 @@ while True:
             screen.blit(font_sm.render(lbl_h, True, (255, 255, 255)),
                         (game.btn_build_heart.x + 12, game.btn_build_heart.y + 10))
 
-            # 3. Płuca (Dużo nabłonka od pęcherzyków, tkanka kostna/łączna jako rusztowanie chrzęstne)
+            # 3. Płuca
             c_lungs = not game.organ_lungs and game.tissue_epithelial >= 2 and game.tissue_bone >= 1 and game.atp >= 60
             pygame.draw.rect(screen, COLOR_PURPLE if c_lungs else (55, 45, 60) if not game.organ_lungs else COLOR_GREEN,
                              game.btn_build_lungs, border_radius=6)
@@ -764,7 +748,7 @@ while True:
             screen.blit(font_sm.render(lbl_l, True, (255, 255, 255)),
                         (game.btn_build_lungs.x + 12, game.btn_build_lungs.y + 10))
 
-            # 4. Żołądek (Nabłonek trawienny, gruba warstwa mięśni gładkich i układ nerwowy)
+            # 4. Żołądek
             c_stom = not game.organ_stomach and game.tissue_epithelial >= 2 and game.tissue_muscle >= 1 and game.tissue_nerve >= 1 and game.atp >= 50
             pygame.draw.rect(screen,
                              COLOR_ORANGE if c_stom else (60, 50, 45) if not game.organ_stomach else COLOR_GREEN,
@@ -775,14 +759,29 @@ while True:
             screen.blit(font_sm.render(lbl_s, True, (255, 255, 255)),
                         (game.btn_build_stomach.x + 12, game.btn_build_stomach.y + 10))
 
-            # --- NOWY OBNIŻONY INKUBATOR ---
+            # --- INKUBATOR TKANKOWY ---
             screen.blit(font_lg.render("INKUBATOR TKANKOWY", True, COLOR_GOLD), (520, 410))
-            # Wizualne tło inkubatora, pod przyciskami
             pygame.draw.rect(screen, (20, 24, 30), (520, 440, 340, 110), border_radius=8)
             pygame.draw.rect(screen, (50, 60, 75), (520, 440, 340, 110), 1, border_radius=8)
-            # ========================================================================
-            # ETAP 5: BAZA DANYCH, LEKSYKON MEDYCZNY I STATYSTYKI
-            # ========================================================================
+
+            # Rysowanie wyhodowanych narządów w magazynie (tylko tych, które nie są jeszcze na człowieku)
+            organs_render_list = [
+                ("brain", "Mózg", (100, 180, 255)),
+                ("heart", "Serce", COLOR_RED),
+                ("lungs", "Płuca", COLOR_PURPLE),
+                ("stomach", "Żołądek", COLOR_ORANGE)
+            ]
+            for key, name, color in organs_render_list:
+                if getattr(game, f"organ_{key}") and not getattr(game, f"placed_{key}"):
+                    pos = game.organ_pos[key]
+                    pygame.draw.rect(screen, color, (pos[0], pos[1], 70, 50), border_radius=5)
+                    pygame.draw.rect(screen, (255, 255, 255), (pos[0], pos[1], 70, 50), 1, border_radius=5)
+                    text_surface = font_sm.render(name, True, (255, 255, 255))
+                    screen.blit(text_surface, (pos[0] + (70 - text_surface.get_width()) // 2, pos[1] + 16))
+
+        # ========================================================================
+        # ETAP 5: BAZA DANYCH, LEKSYKON MEDYCZNY I STATYSTYKI
+        # ========================================================================
         elif game.current_tab == 5:
             # Tło główne zakładki
             pygame.draw.rect(screen, (22, 26, 32), (40, 150, 820, 540), border_radius=8)
@@ -950,271 +949,24 @@ while True:
                         (rx, ry + 110))
 
             pygame.draw.line(screen, (60, 70, 85), (620, 350), (835, 350), 1)
-
             screen.blit(font_lg.render("OSIĄGNIĘCIA", True, COLOR_GOLD), (rx, 360))
 
             ach_list = game.get_achievements_list()
             ay_offset = 390
-
             for title, desc, unlocked in ach_list[:5]:
                 color_title = COLOR_GREEN if unlocked else (150, 150, 150)
                 status_text = "[OK]" if unlocked else "[..]"
                 screen.blit(font_sm.render(f"{status_text} {title}", True, color_title), (rx, ay_offset))
                 screen.blit(font_sm.render(f"  {desc}", True, COLOR_TEXT_MUTED), (rx, ay_offset + 16))
                 ay_offset += 36
-            # Rysowanie wyhodowanych narządów (tylko tych, które nie są jeszcze na człowieku)
-            organs_render_list = [
-                ("brain", "Mózg", (100, 180, 255)),
-                ("heart", "Serce", COLOR_RED),
-                ("lungs", "Płuca", COLOR_PURPLE),
-                ("stomach", "Żołądek", COLOR_ORANGE)
-            ]
-            for key, name, color in organs_render_list:
-                if getattr(game, f"organ_{key}") and not getattr(game, f"placed_{key}"):
-                    pos = game.organ_pos[key]
-                    pygame.draw.rect(screen, color, (pos[0], pos[1], 70, 50), border_radius=5)
-                    pygame.draw.rect(screen, (255, 255, 255), (pos[0], pos[1], 70, 50), 1, border_radius=5)
-                    text_surface = font_sm.render(name, True, (255, 255, 255))
-                    screen.blit(text_surface, (pos[0] + (70 - text_surface.get_width()) // 2, pos[1] + 16))
-                    # === TUTAJ ZACZYNA SIĘ TWÓJ NOWY KOD, KTÓRY WCISKASZ POD ETAPEM 4 ===
 
-                    # 1. RYSOWANIE PRZYCISKU MENU "BAZA I STATY" (Będzie widoczny zawsze na górze)
-                    is_active_5 = game.current_tab == 5
-                    pygame.draw.rect(screen, (40, 80, 130) if is_active_5 else (45, 50, 60), game.btn_tab5,
-                                     border_radius=4)
-                    pygame.draw.rect(screen, (100, 180, 255) if is_active_5 else (80, 90, 100), game.btn_tab5, 1)
-                    screen.blit(font_sm.render("Baza i Staty", True, (255, 255, 255)),
-                                (game.btn_tab5.x + 18, game.btn_tab5.y + 10))
+        # --- PRZYCISK MENU GÓRNEGO "BAZA I STATY" ---
+        # Rysuje się niezależnie od aktywnego tabu (na samym dole struktury warunków)
+        is_active_5 = game.current_tab == 5
+        pygame.draw.rect(screen, (40, 80, 130) if is_active_5 else (45, 50, 60), game.btn_tab5, border_radius=4)
+        pygame.draw.rect(screen, (100, 180, 255) if is_active_5 else (80, 90, 100), game.btn_tab5, 1)
+        screen.blit(font_sm.render("Baza i Staty", True, (255, 255, 255)), (game.btn_tab5.x + 18, game.btn_tab5.y + 10))
 
-                    # 2. CAŁY BLOK RYSOWANIA ETAPU 5
-                    if game.current_tab == 5:
-                        # Tło główne zakładki
-                        pygame.draw.rect(screen, (22, 26, 32), (40, 150, 820, 540), border_radius=8)
-                        pygame.draw.rect(screen, (55, 65, 80), (40, 150, 820, 540), 2, border_radius=8)
-
-                        # Nagłówek panelu
-                        screen.blit(font_title.render("CENTRUM BADAWCZE: LEKSYKON I STATYSTYKI", True, COLOR_GOLD),
-                                    (60, 165))
-
-                        # LEWY PANEL: NAWIGACJA LEKSYKONU
-                        pygame.draw.rect(screen, (28, 33, 40), (50, 200, 180, 475), border_radius=4)
-                        pygame.draw.rect(screen, (45, 55, 65), (50, 200, 180, 475), 1)
-
-                        lex_buttons = [
-                            ("intro", "Wprowadzenie", game.btn_lex_intro),
-                            ("nerve", "Tk. Nerwowa", game.btn_lex_nerve),
-                            ("muscle", "Tk. Mięśniowa", game.btn_lex_muscle),
-                            ("epith", "Tk. Nabłonkowa", game.btn_lex_epith),
-                            ("bone", "Tk. Łączna/Kostna", game.btn_lex_bone),
-                            ("brain", "Narząd: Mózg", game.btn_lex_brain),
-                            ("heart", "Narząd: Serce", game.btn_lex_heart),
-                            ("lungs", "Narząd: Płuca", game.btn_lex_lungs),
-                            ("stomach", "Narząd: Żołądek", game.btn_lex_stomach)
-                        ]
-
-                        for key, label, rect in lex_buttons:
-                            is_sel = game.lexicon_selected == key
-                            pygame.draw.rect(screen, (40, 60, 90) if is_sel else (34, 40, 49), rect, border_radius=4)
-                            pygame.draw.rect(screen, (100, 150, 255) if is_sel else (60, 70, 80), rect, 1)
-                            screen.blit(font_sm.render(label, True, (255, 255, 255)), (rect.x + 10, rect.y + 6))
-
-                        # ŚRODKOWY PANEL: TREŚĆ ARTYKUŁÓW
-                        pygame.draw.rect(screen, (24, 28, 35), (240, 200, 360, 475), border_radius=4)
-                        pygame.draw.rect(screen, (45, 55, 65), (240, 200, 360, 475), 1)
-
-                        tx, ty = 255, 215
-                        if game.lexicon_selected == "intro":
-                            screen.blit(font_lg.render("Atlas Histologiczno-Anatomiczny", True, COLOR_GOLD), (tx, ty))
-                            screen.blit(font_sm.render("Witaj w bazie wiedzy bioinżynieryjnej.", True, COLOR_TEXT),
-                                        (tx, ty + 40))
-                            screen.blit(font_sm.render("Wybierz interesującą Cię tkankę lub organ", True, COLOR_TEXT),
-                                        (tx, ty + 60))
-                            screen.blit(font_sm.render("z menu po lewej stronie, aby zapoznać się", True, COLOR_TEXT),
-                                        (tx, ty + 80))
-                            screen.blit(font_sm.render("z jej strukturą biologiczną, funkcją", True, COLOR_TEXT),
-                                        (tx, ty + 100))
-                            screen.blit(font_sm.render("w organizmie oraz wymaganiami syntezy.", True, COLOR_TEXT),
-                                        (tx, ty + 120))
-                            screen.blit(
-                                font_sm.render("Projekt realizuje założenia dydaktyczne", True, COLOR_TEXT_MUTED),
-                                (tx, ty + 160))
-                            screen.blit(
-                                font_sm.render("z zakresu biologii komórki i anatomii.", True, COLOR_TEXT_MUTED),
-                                (tx, ty + 180))
-
-                        elif game.lexicon_selected == "nerve":
-                            screen.blit(font_lg.render("Tkanka Nerwowa (Nervous Tissue)", True, COLOR_GOLD), (tx, ty))
-                            screen.blit(font_sm.render("• Skład: Neurony oraz komórki glejowe.", True, COLOR_TEXT),
-                                        (tx, ty + 40))
-                            screen.blit(font_sm.render("• Funkcja: Przewodzenie impulsów", True, COLOR_TEXT),
-                                        (tx, ty + 65))
-                            screen.blit(font_sm.render("  elektrochemicznych, odbieranie bodźców.", True, COLOR_TEXT),
-                                        (tx, ty + 85))
-                            screen.blit(font_sm.render("• Cechy: Neurony nie dzielą się", True, COLOR_TEXT),
-                                        (tx, ty + 110))
-                            screen.blit(
-                                font_sm.render("  w dorosłym organizmie (baza postmitotyczna).", True, COLOR_TEXT),
-                                (tx, ty + 130))
-                            screen.blit(font_sm.render("• Glej: Odżywia i chroni neurony,", True, COLOR_TEXT),
-                                        (tx, ty + 155))
-                            screen.blit(font_sm.render("  tworzy osłonki mielinowe (izolacja).", True, COLOR_TEXT),
-                                        (tx, ty + 175))
-                            screen.blit(
-                                font_sm.render("• Zastosowanie: Kluczowa do budowy Mózgu", True, (100, 180, 255)),
-                                (tx, ty + 210))
-
-                        elif game.lexicon_selected == "muscle":
-                            screen.blit(font_lg.render("Tkanka Mięśniowa (Muscle Tissue)", True, COLOR_GOLD), (tx, ty))
-                            screen.blit(
-                                font_sm.render("• Rodzaje: Poprzecznie prążkowana szkieletowa,", True, COLOR_TEXT),
-                                (tx, ty + 40))
-                            screen.blit(font_sm.render("  sercowa oraz gładka (narządowa).", True, COLOR_TEXT),
-                                        (tx, ty + 60))
-                            screen.blit(font_sm.render("• Cechy: Zdolność do kurczenia się", True, COLOR_TEXT),
-                                        (tx, ty + 85))
-                            screen.blit(font_sm.render("  dzięki obecności aktyny i miozyny.", True, COLOR_TEXT),
-                                        (tx, ty + 105))
-                            screen.blit(
-                                font_sm.render("• Szkieletowa: Zależna od woli, wielojądrowa.", True, COLOR_TEXT),
-                                (tx, ty + 130))
-                            screen.blit(font_sm.render("• Sercowa: Wstawki, skurcz automatyczny.", True, COLOR_TEXT),
-                                        (tx, ty + 155))
-                            screen.blit(font_sm.render("• Gładka: Niezależna, wyściela żołądek.", True, COLOR_TEXT),
-                                        (tx, ty + 180))
-
-                        elif game.lexicon_selected == "epith":
-                            screen.blit(font_lg.render("Tkanka Nabłonkowa (Epithelial)", True, COLOR_GOLD), (tx, ty))
-                            screen.blit(font_sm.render("• Charakterystyka: Zwarty układ komórek,", True, COLOR_TEXT),
-                                        (tx, ty + 40))
-                            screen.blit(
-                                font_sm.render("  minimalna ilość substancji międzykomórkowej.", True, COLOR_TEXT),
-                                (tx, ty + 60))
-                            screen.blit(
-                                font_sm.render("• Podział: Jednowarstwowe (płaski, sześcienny,", True, COLOR_TEXT),
-                                (tx, ty + 85))
-                            screen.blit(font_sm.render("  walcowaty) oraz wielowarstwowe.", True, COLOR_TEXT),
-                                        (tx, ty + 105))
-                            screen.blit(font_sm.render("• Funkcja ochronna: Skóra, wyściółka.", True, COLOR_TEXT),
-                                        (tx, ty + 130))
-                            screen.blit(font_sm.render("• Funkcja wydzielnicza: Gruczoły trawienne.", True, COLOR_TEXT),
-                                        (tx, ty + 155))
-
-                        elif game.lexicon_selected == "bone":
-                            screen.blit(font_lg.render("Tkanka Łączna / Kostna", True, COLOR_GOLD), (tx, ty))
-                            screen.blit(font_sm.render("• Cechy: Dużo substancji międzykomórkowej", True, COLOR_TEXT),
-                                        (tx, ty + 40))
-                            screen.blit(font_sm.render("  (macierzy) oraz włókien kolagenowych.", True, COLOR_TEXT),
-                                        (tx, ty + 60))
-                            screen.blit(
-                                font_sm.render("• Tkanka Kostna: Wysycona solami mineralnymi", True, COLOR_TEXT),
-                                (tx, ty + 85))
-                            screen.blit(
-                                font_sm.render("  (wapń, fosfor) – daje twardość i sztywność.", True, COLOR_TEXT),
-                                (tx, ty + 105))
-                            screen.blit(font_sm.render("• Tkanka Chrzęstna: Elastyczna, brak naczyń", True, COLOR_TEXT),
-                                        (tx, ty + 130))
-                            screen.blit(font_sm.render("  krwionośnych (odżywianie przez dyfuzję).", True, COLOR_TEXT),
-                                        (tx, ty + 155))
-
-                        elif game.lexicon_selected == "brain":
-                            screen.blit(font_lg.render("Mózgowie (Encephalon)", True, COLOR_GOLD), (tx, ty))
-                            screen.blit(font_sm.render("• Główny narząd ośrodkowego układu", True, COLOR_TEXT),
-                                        (tx, ty + 40))
-                            screen.blit(font_sm.render("  nerwowego. Kontroluje większość procesów.", True, COLOR_TEXT),
-                                        (tx, ty + 60))
-                            screen.blit(font_sm.render("• Zużycie energii: Pochłania okołu 20%", True, COLOR_TEXT),
-                                        (tx, ty + 85))
-                            screen.blit(font_sm.render("  całego tlenu i glukozy organizmu.", True, COLOR_TEXT),
-                                        (tx, ty + 105))
-                            screen.blit(font_sm.render("• Budowa histologiczna: Istota szara", True, COLOR_TEXT),
-                                        (tx, ty + 130))
-                            screen.blit(
-                                font_sm.render("  (ciała neuronów) oraz istota biała (aksony).", True, COLOR_TEXT),
-                                (tx, ty + 155))
-
-                        elif game.lexicon_selected == "heart":
-                            screen.blit(font_lg.render("Serce (Cor / Heart)", True, COLOR_GOLD), (tx, ty))
-                            screen.blit(font_sm.render("• Centralny narząd układu krwionośnego.", True, COLOR_TEXT),
-                                        (tx, ty + 40))
-                            screen.blit(
-                                font_sm.render("  Działa jako ciśnieniowa pompa ssąco-tłocząca.", True, COLOR_TEXT),
-                                (tx, ty + 60))
-                            screen.blit(font_sm.render("• Myokardium: Gruba warstwa unikalnej", True, COLOR_TEXT),
-                                        (tx, ty + 85))
-                            screen.blit(
-                                font_sm.render("  tkanki mięśniowej poprzecznie prążkowanej.", True, COLOR_TEXT),
-                                (tx, ty + 105))
-                            screen.blit(font_sm.render("• Automatyzm: Własny system generowania", True, COLOR_TEXT),
-                                        (tx, ty + 130))
-                            screen.blit(font_sm.render("  impulsów (węzeł zatokowo-przedsionkowy).", True, COLOR_TEXT),
-                                        (tx, ty + 155))
-
-                        elif game.lexicon_selected == "lungs":
-                            screen.blit(font_lg.render("Płuca (Pulmones)", True, COLOR_GOLD), (tx, ty))
-                            screen.blit(font_sm.render("• Główny narząd wymiany gazowej.", True, COLOR_TEXT),
-                                        (tx, ty + 40))
-                            screen.blit(font_sm.render("  Dostarcza tlen, usuwa dwutlenek węgla.", True, COLOR_TEXT),
-                                        (tx, ty + 60))
-                            screen.blit(
-                                font_sm.render("• Dyfuzja: Zachodzi przez ekstremalnie cienki", True, COLOR_TEXT),
-                                (tx, ty + 85))
-                            screen.blit(
-                                font_sm.render("  nabłonek jednowarstwowy płaski pęcherzyków.", True, COLOR_TEXT),
-                                (tx, ty + 105))
-                            screen.blit(font_sm.render("• Rusztowanie: Drzewo oskrzelowe chronione", True, COLOR_TEXT),
-                                        (tx, ty + 130))
-                            screen.blit(
-                                font_sm.render("  jest przez chrzęstne pierścienie łącznotkankowe.", True, COLOR_TEXT),
-                                (tx, ty + 155))
-
-                        elif game.lexicon_selected == "stomach":
-                            screen.blit(font_lg.render("Żołądek (Gaster / Stomach)", True, COLOR_GOLD), (tx, ty))
-                            screen.blit(font_sm.render("• Narząd muskularny układu pokarmowego.", True, COLOR_TEXT),
-                                        (tx, ty + 40))
-                            screen.blit(font_sm.render("  Odpowiada za wstępne trawienie białek.", True, COLOR_TEXT),
-                                        (tx, ty + 60))
-                            screen.blit(font_sm.render("• Sok żołądkowy: Zawiera kwas solny (HCl)", True, COLOR_TEXT),
-                                        (tx, ty + 85))
-                            screen.blit(font_sm.render("  o pH 1-2 oraz enzym pepsynę.", True, COLOR_TEXT),
-                                        (tx, ty + 105))
-                            screen.blit(font_sm.render("• Ochrona: Gruba warstwa śluzu", True, COLOR_TEXT),
-                                        (tx, ty + 130))
-                            screen.blit(font_sm.render("  zapobiega samostrawieniu ścian narządu.", True, COLOR_TEXT),
-                                        (tx, ty + 155))
-
-                        # PRAWY PANEL: STATYSTYKI GRY I OSIĄGNIĘCIA
-                        pygame.draw.rect(screen, (28, 33, 40), (615, 200, 230, 475), border_radius=4)
-                        pygame.draw.rect(screen, (45, 55, 65), (615, 200, 230, 475), 1)
-
-                        rx, ry = 625, 215
-                        screen.blit(font_lg.render("STATYSTYKI", True, COLOR_GOLD), (rx, ry))
-                        screen.blit(
-                            font_sm.render(f"Kliknięcia ogółem: {game.stats['total_clicks']}", True, (240, 240, 240)),
-                            (rx, ry + 30))
-                        screen.blit(
-                            font_sm.render(f"Wygenerowane ATP: {game.stats['atp_generated']}", True, (240, 240, 240)),
-                            (rx, ry + 50))
-                        screen.blit(font_sm.render(f"Wyhodowane tkanki: {game.stats['tissues_crafted']}", True,
-                                                   (240, 240, 240)), (rx, ry + 70))
-                        screen.blit(
-                            font_sm.render(f"Zbudowane narządy: {game.stats['organs_built']}", True, (240, 240, 240)),
-                            (rx, ry + 90))
-                        screen.blit(font_sm.render(f"Błędy laboratoryjne: {game.stats['failed_attempts']}", True,
-                                                   (240, 240, 240)), (rx, ry + 110))
-
-                        pygame.draw.line(screen, (60, 70, 85), (620, 350), (835, 350), 1)
-
-                        screen.blit(font_lg.render("OSIĄGNIĘCIA", True, COLOR_GOLD), (rx, 360))
-
-                        ach_list = game.get_achievements_list()
-                        ay_offset = 390
-
-                        for title, desc, unlocked in ach_list[:5]:
-                            color_title = COLOR_GREEN if unlocked else (150, 150, 150)
-                            status_text = "[OK]" if unlocked else "[..]"
-                            screen.blit(font_sm.render(f"{status_text} {title}", True, color_title), (rx, ay_offset))
-                            screen.blit(font_sm.render(f"  {desc}", True, COLOR_TEXT_MUTED), (rx, ay_offset + 16))
-                            ay_offset += 36
         game.draw_ui(screen)
     elif game.state == "GAME_OVER":
         screen.fill((35, 18, 18))
