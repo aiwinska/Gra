@@ -1066,7 +1066,7 @@ while True:
     elif game.state == "VICTORY":
         screen.fill((20, 40, 25))
         screen.blit(font_title.render("ORGANIZM UKOŃCZONY!", True, COLOR_GOLD), (WIDTH // 2 - 220, HEIGHT // 2 - 50))
-        screen.blit(font_md.render("Ontogeneza zakończona pełnym sukcesem.", True, COLOR_TEXT),
+        screen.blit(font_md.render("Ontogeneza zakończona pełnym sukcesem!", True, COLOR_TEXT),
                     (WIDTH // 2 - 180, HEIGHT // 2 + 20))
         for event in pygame.event.get():
             if event.type == pygame.QUIT: pygame.quit(); sys.exit()
