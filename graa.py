@@ -460,6 +460,8 @@ while True:
             if event.type == pygame.QUIT: pygame.quit(); sys.exit()
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                game.stats["total_clicks"] += 1
+                pos = event.pos
                 # Przełączanie zakładek
                 for tab in game.tabs_ui:
                     if tab["rect"].collidepoint(event.pos):
@@ -473,55 +475,134 @@ while True:
                     if game.btn_divide.collidepoint(event.pos): game.trigger_mitosis()
                     if game.btn_apoptosis.collidepoint(event.pos): game.trigger_apoptosis()
 
-                # Kliknięcia w Etapie 3
-                if game.current_tab == 3:
-                    if game.btn_craft_nerve.collidepoint(event.pos):
-                        game.craft_tissue("nerve")
-                    if game.btn_craft_muscle.collidepoint(event.pos):
-                        game.craft_tissue("muscle")
-                    if game.btn_craft_bone.collidepoint(event.pos):
-                        game.craft_tissue("bone")
-                    if game.btn_craft_epithelial.collidepoint(event.pos):
-                        game.craft_tissue("epithelial")
+                elif game.current_tab == 3:
+                    # 1. Tkanka Nerwowa
+                    if game.btn_craft_nerve.collidepoint(pos):
+                        if game.stem_cells >= 1 and game.amino >= 5 and game.atp >= 80:
+                            game.stem_cells -= 1
+                            game.amino -= 5
+                            game.atp -= 80
+                            game.tissue_nerve += 1
+                            game.stats["tissues_crafted"] += 1  # Zliczanie tkanki
+                        else:
+                            game.stats["failed_attempts"] += 1  # Brak surowców = błąd
 
-                # Kliknięcia i chwytanie w Etapie 4
-                if game.current_tab == 4:
-                    if game.btn_build_brain.collidepoint(event.pos): game.build_organ("brain")
-                    if game.btn_build_heart.collidepoint(event.pos): game.build_organ("heart")
-                    if game.btn_build_lungs.collidepoint(event.pos): game.build_organ("lungs")
-                    if game.btn_build_stomach.collidepoint(event.pos): game.build_organ("stomach")
+                    # 2. Tkanka Mięśniowa
+                    elif game.btn_craft_muscle.collidepoint(pos):
+                        if game.stem_cells >= 1 and game.amino >= 4 and game.atp >= 60:
+                            game.stem_cells -= 1
+                            game.amino -= 4
+                            game.atp -= 60
+                            game.tissue_muscle += 1
+                            game.stats["tissues_crafted"] += 1  # Zliczanie tkanki
+                        else:
+                            game.stats["failed_attempts"] += 1  # Brak surowców = błąd
 
-                    for organ, pos in game.organ_pos.items():
-                        if getattr(game, f"organ_{organ}") and not getattr(game, f"placed_{organ}"):
-                            rect = pygame.Rect(pos[0], pos[1], 70, 50)
-                            if rect.collidepoint(event.pos):
-                                game.dragging_organ = organ
-                                game.drag_offset_x = event.pos[0] - pos[0]
-                                game.drag_offset_y = event.pos[1] - pos[1]
+                    # 3. Tkanka Kostna
+                    elif game.btn_craft_bone.collidepoint(pos):
+                        if game.stem_cells >= 1 and game.amino >= 3 and game.atp >= 50:
+                            game.stem_cells -= 1
+                            game.amino -= 3
+                            game.atp -= 50
+                            game.tissue_bone += 1
+                            game.stats["tissues_crafted"] += 1  # Zliczanie tkanki
+                        else:
+                            game.stats["failed_attempts"] += 1  # Brak surowców = błąd
+
+                    # 4. Tkanka Nabłonkowa
+                    elif game.btn_craft_epithelial.collidepoint(pos):
+                        if game.stem_cells >= 1 and game.amino >= 6 and game.atp >= 70:
+                            game.stem_cells -= 1
+                            game.amino -= 6
+                            game.atp -= 70
+                            game.tissue_epithelial += 1
+                            game.stats["tissues_crafted"] += 1  # Zliczanie tkanki
+                        else:
+                            game.stats["failed_attempts"] += 1  # Brak surowców = błąd
+
+                    # =================================================================
+                    # KLIKNIĘCIA: ETAP 4 (FABRYKA NARZĄDÓW & DRAG & DROP)
+                    # =================================================================
+                elif game.current_tab == 4:
+                    # --- Budowanie Narządów ---
+                    # 1. Mózg
+                    if game.btn_build_brain.collidepoint(pos):
+                        if not game.organ_brain and game.tissue_nerve >= 2 and game.tissue_epithelial >= 1 and game.atp >= 60:
+                            game.tissue_nerve -= 2
+                            game.tissue_epithelial -= 1
+                            game.atp -= 60
+                            game.organ_brain = True
+                            game.stats["organs_built"] += 1  # Zliczanie narządu
+                        elif not game.organ_brain:
+                            game.stats["failed_attempts"] += 1  # Brak surowców = błąd
+
+                    # 2. Serce
+                    elif game.btn_build_heart.collidepoint(pos):
+                        if not game.organ_heart and game.tissue_muscle >= 2 and game.tissue_nerve >= 1 and game.tissue_epithelial >= 1 and game.atp >= 70:
+                            game.tissue_muscle -= 2
+                            game.tissue_nerve -= 1
+                            game.tissue_epithelial -= 1
+                            game.atp -= 70
+                            game.organ_heart = True
+                            game.stats["organs_built"] += 1  # Zliczanie narządu
+                        elif not game.organ_heart:
+                            game.stats["failed_attempts"] += 1  # Brak surowców = błąd
+
+                    # 3. Płuca
+                    elif game.btn_build_lungs.collidepoint(pos):
+                        if not game.organ_lungs and game.tissue_epithelial >= 2 and game.tissue_bone >= 1 and game.atp >= 60:
+                            game.tissue_epithelial -= 2
+                            game.tissue_bone -= 1
+                            game.atp -= 60
+                            game.organ_lungs = True
+                            game.stats["organs_built"] += 1  # Zliczanie narządu
+                        elif not game.organ_lungs:
+                            game.stats["failed_attempts"] += 1  # Brak surowców = błąd
+
+                    # 4. Żołądek
+                    elif game.btn_build_stomach.collidepoint(pos):
+                        if not game.organ_stomach and game.tissue_epithelial >= 2 and game.tissue_muscle >= 1 and game.tissue_nerve >= 1 and game.atp >= 50:
+                            game.tissue_epithelial -= 2
+                            game.tissue_muscle -= 1
+                            game.tissue_nerve -= 1
+                            game.atp -= 50
+                            game.organ_stomach = True
+                            game.stats["organs_built"] += 1  # Zliczanie narządu
+                        elif not game.organ_stomach:
+                            game.stats["failed_attempts"] += 1  # Brak surowców = błąd
+
+                    # --- Logika Chwytania Narządów (Drag & Drop) ---
+                    for key in game.organ_pos:
+                        if getattr(game, f"organ_{key}") and not getattr(game, f"placed_{key}"):
+                            opos = game.organ_pos[key]
+                            orect = pygame.Rect(opos[0], opos[1], 70, 50)
+                            if orect.collidepoint(pos):
+                                game.dragging_organ = key
+                                game.drag_offset_x = pos[0] - opos[0]
+                                game.drag_offset_y = pos[1] - opos[1]
                                 break
 
-            if event.type == pygame.MOUSEMOTION:
-                game.stats["total_clicks"] += 1
-                if game.btn_tab5.collidepoint(event.pos):
-                    game.current_tab = 5
-                if game.current_tab == 5:
-                    if game.btn_lex_intro.collidepoint(event.pos):
+                    # =================================================================
+                    # KLIKNIĘCIA: ETAP 5 (NAWIGACJA WEWNĄTRZ LEKSYKONU)
+                    # =================================================================
+                elif game.current_tab == 5:
+                    if game.btn_lex_intro.collidepoint(pos):
                         game.lexicon_selected = "intro"
-                    elif game.btn_lex_nerve.collidepoint(event.pos):
+                    elif game.btn_lex_nerve.collidepoint(pos):
                         game.lexicon_selected = "nerve"
-                    elif game.btn_lex_muscle.collidepoint(event.pos):
+                    elif game.btn_lex_muscle.collidepoint(pos):
                         game.lexicon_selected = "muscle"
-                    elif game.btn_lex_epith.collidepoint(event.pos):
+                    elif game.btn_lex_epith.collidepoint(pos):
                         game.lexicon_selected = "epith"
-                    elif game.btn_lex_bone.collidepoint(event.pos):
+                    elif game.btn_lex_bone.collidepoint(pos):
                         game.lexicon_selected = "bone"
-                    elif game.btn_lex_brain.collidepoint(event.pos):
+                    elif game.btn_lex_brain.collidepoint(pos):
                         game.lexicon_selected = "brain"
-                    elif game.btn_lex_heart.collidepoint(event.pos):
+                    elif game.btn_lex_heart.collidepoint(pos):
                         game.lexicon_selected = "heart"
-                    elif game.btn_lex_lungs.collidepoint(event.pos):
+                    elif game.btn_lex_lungs.collidepoint(pos):
                         game.lexicon_selected = "lungs"
-                    elif game.btn_lex_stomach.collidepoint(event.pos):
+                    elif game.btn_lex_stomach.collidepoint(pos):
                         game.lexicon_selected = "stomach"
                 if game.current_tab == 4 and game.dragging_organ:
                     game.organ_pos[game.dragging_organ][0] = event.pos[0] - game.drag_offset_x
@@ -827,10 +908,7 @@ while True:
                             (tx, ty + 80))
                 screen.blit(font_sm.render("z jej strukturą biologiczną, funkcją", True, COLOR_TEXT), (tx, ty + 100))
                 screen.blit(font_sm.render("w organizmie oraz wymaganiami syntezy.", True, COLOR_TEXT), (tx, ty + 120))
-                screen.blit(font_sm.render("Projekt realizuje założenia dydaktyczne", True, COLOR_TEXT_MUTED),
-                            (tx, ty + 160))
-                screen.blit(font_sm.render("z zakresu biologii komórki i anatomii.", True, COLOR_TEXT_MUTED),
-                            (tx, ty + 180))
+                
 
             elif game.lexicon_selected == "nerve":
                 screen.blit(font_lg.render("Tkanka Nerwowa (Nervous Tissue)", True, COLOR_GOLD), (tx, ty))
