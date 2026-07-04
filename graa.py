@@ -177,11 +177,12 @@ class Game:
         self.tabs_ui = [
             {"id": 1, "rect": pygame.Rect(10, 10, 160, 40), "label": "1. Krwiobieg"},
             {"id": 2, "rect": pygame.Rect(180, 10, 160, 40), "label": "2. Mitoza"},
-            {"id": 3, "rect": pygame.Rect(350, 10, 160, 40), "label": "3. Laboratorium"},
-            {"id": 4, "rect": pygame.Rect(520, 10, 160, 40), "label": "4. Atlas ciała"}
+            {"id": 3, "rect": pygame.Rect(350, 10, 170, 40), "label": "3. Laboratorium"},
+            {"id": 4, "rect": pygame.Rect(530, 10, 170, 40), "label": "4. Atlas ciała"},
+            {"id": 5, "rect": pygame.Rect(710, 10, 170, 40), "label": "5. Wiedza"}
         ]
-        # Przycisk dla zakładki 5 (Baza danych) przesunięty, by nie nachodził na resztę
-        self.btn_tab5 = pygame.Rect(690, 10, 160, 40)
+        self.btn_tab5 = self.tabs_ui[4]["rect"]
+
 
         # BLOKADY ETAPÓW
         self.level2_unlocked = False
